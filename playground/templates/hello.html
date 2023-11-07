@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+<body>
+    <h1>Data from Firebase</h1>
+    <table boder="1">
+        <div><img src="{% Datamining.png' %}" alt="Hasil Clustering"></div>
+        {% for key, value in data_list.items %}
+            <tr>Jumlah: {{ value.jmlh }} </tr>
+            <tr>Latitude: {{ value.lat }} </tr>
+            <tr>Longitude: {{ value.lng }} </tr>
+            <tr>Cluster: {{ value.cluster }} </tr>
+            <br>
+        {% endfor %}
+    </table>    
+
+</body>
+</html>
