@@ -5,6 +5,11 @@ name = "pypi"
 
 [packages]
 django = "*"
+matplotlib = "*"
+firebase-admin = "*"
+pandas = "*"
+scikit-learn = "*"
+geopandas = "*"
 
 [dev-packages]
 

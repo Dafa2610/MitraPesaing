@@ -48,7 +48,7 @@ def get_data_from_firebase(request):
     x = olahdata(data_trsk)
     # Pilih parameter DBSCAN
     eps = 0.003  # Sesuaikan nilai ini sesuai kebutuhan Anda
-    min_samples = 10  # Sesuaikan nilai ini sesuai kebutuhan Anda
+    min_samples = 5  # Sesuaikan nilai ini sesuai kebutuhan Anda
 
     dbscan = DBSCAN(eps=eps, min_samples=min_samples)
     x['cluster'] = dbscan.fit_predict(x[['lat', 'lng']])

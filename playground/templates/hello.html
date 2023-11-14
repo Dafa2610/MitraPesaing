@@ -1,11 +1,14 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 
 
 <body>
     <h1>Data from Firebase</h1>
+    <img src="{% static 'Datamining.png' %}" alt="Hasil Clustering">
+    <br>
+    <br>
     <table boder="1">
-        <div><img src="{% Datamining.png' %}" alt="Hasil Clustering"></div>
         {% for key, value in data_list.items %}
             <tr>Jumlah: {{ value.jmlh }} </tr>
             <tr>Latitude: {{ value.lat }} </tr>
