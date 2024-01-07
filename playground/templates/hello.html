@@ -1,23 +1,31 @@
-{% load static %}
 <!DOCTYPE html>
-<html lang="en">
 
-
+<html>
+<head>
+    <title>Data Display</title>
+</head>
 <body>
-    <h1>Data from Firebase</h1>
-    <img src="{% static 'Datamining.png' %}" alt="Hasil Clustering">
-    <br>
-    <br>
-    <table boder="1">
-        {% for key, value in data_list.items %}
-            <tr>Jumlah: {{ value.jmlh }} </tr>
-            <tr>Latitude: {{ value.lat }} </tr>
-            <tr>Longitude: {{ value.lng }} </tr>
-            <tr>Cluster: {{ value.cluster }} </tr>
-            <br>
-            <br>
-        {% endfor %}
-    </table>    
-
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Jumlah</th>
+                <th>Latitude</th>
+                <th>Longitude</th>
+                <th>Timestamp</th>
+                <th>Cluster</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in data_list %}
+            <tr>
+                <td>{{ item.jmlh }}</td>
+                <td>{{ item.lat }}</td>
+                <td>{{ item.lng }}</td>
+                <td>{{ item.timestamp }}</td>
+                <td>{{ item.cluster }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </body>
 </html>
