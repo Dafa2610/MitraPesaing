@@ -1,0 +1,30 @@
+Function DBSCAN(Dataset, eps, MinPts):
+    ClusterLabel = 0
+
+    For each point P in Dataset:
+        If P is visited:
+            Continue to the next point
+
+        Mark P as visited
+        Neighbors = regionQuery(P, eps)
+
+        If the number of Neighbors < MinPts:
+            Mark P as Noise
+        Else:
+            ClusterLabel = ClusterLabel + 1
+            ExpandCluster(P, Neighbors, ClusterLabel, eps, MinPts)
+
+Function regionQuery(Point P, eps):
+    Return all points within the eps-neighborhood of P
+
+Function ExpandCluster(Point P, Neighbors, ClusterLabel, eps, MinPts):
+    Assign P to ClusterLabel
+    For each point Q in Neighbors:
+        If Q is not visited:
+            Mark Q as visited
+            NeighborsOfQ = regionQuery(Q, eps)
+
+            If the number of NeighborsOfQ >= MinPts:
+                Neighbors = Neighbors U NeighborsOfQ
+        If Q does not belong to any cluster:
+            Assign Q to ClusterLabel

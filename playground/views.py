@@ -1,10 +1,10 @@
+from django_cron import CronJobBase, Schedule
 from django.shortcuts import render
 from django.http import HttpResponse
 from playground.script import olahdata
 import pandas as pd
 import firebase_admin
 from firebase_admin import credentials, db
-from io import BytesIO
 from sklearn.cluster import DBSCAN
 import matplotlib.pyplot as plt
 import csv
@@ -24,13 +24,16 @@ firebase_admin.initialize_app(cred, {
     'databaseURL': 'https://pesaing-bornewtech-default-rtdb.firebaseio.com/'
 })
 
-def get_data_from_firebase(request):
-    # Referensi Firebase 
-
+class GetFirebaseDataCronJob(CronJobBase):
     ref = db.reference('data')  # Ganti dengan path data di Firebase
+
+    #Hapus Data
+    ref.delete()
 
     # Ambil data dari Firebase
     firebase_data = ref.get()
+
+    print(firebase_data)
     # Inisialisasi list Django
     data_trsk = pd.read_csv('data.csv', sep=',')
 
@@ -81,29 +84,9 @@ def get_data_from_firebase(request):
         
     
         # Mengirim data ke Firebase
-        # ref.push().set(data)
-
-    # Baca file CSV dan masukkan data ke Firebase Realtime Database
-    # with open('data_selected.csv', newline='') as csvfile:
-    #     csv_reader = csv.DictReader(csvfile)
-    #     for row in csv_reader:
-    #         data = {
-    #             'jmlh': int(row['jmlh']),
-    #             'lat': float(row['lat']),
-    #             'lng': float(row['lng']),
-    #             'timestamp': int(row['timestamp']),
-    #             'cluster': int(row['cluster'])
-    #         }
-    #         # ref.push().set(data)
-    # # print(x)
-
-    # Buka file CSV dalam mode append ('a') agar Anda dapat menambahkan data baru
-    # with open('data_selected.csv', mode='a', newline='') as file:
-    #     writer = csv.writer(file)
-    #     # Tulis data baru ke dalam file CSV
-    #     for row in x:
-    #         writer.writerow(row)
-    #         print(row)
-    # Ubah data dari Firebase ke dalam list Django
-
-    return render(request, 'hello.html', {'data_list': selected_columns})
+        ref.push().set(data)
+    
+    # return render(request, 'hello.html', {'data_list': x})
+    # RUN_EVERY_MIDNIGHT = Schedule(run_at_times=['00:00'])
+    # # Referensi Firebase 
+    # def do(self):
