@@ -27,8 +27,6 @@ firebase_admin.initialize_app(cred, {
 class GetFirebaseDataCronJob(CronJobBase):
     ref = db.reference('data')  # Ganti dengan path data di Firebase
 
-    #Hapus Data
-    ref.delete()
 
     # Ambil data dari Firebase
     firebase_data = ref.get()
@@ -45,6 +43,11 @@ class GetFirebaseDataCronJob(CronJobBase):
     dbscan = DBSCAN(eps=eps, min_samples=min_samples)
     x['cluster'] = dbscan.fit_predict(x[['lat', 'lng']])
 
+    #Hapus Data
+    ref.delete()
+
+    berat_cluster = x['cluster'].value_counts()
+    print(berat_cluster)
 
     # Visualisasi hasil clustering
     # Pilih parameter DBSCAN
@@ -57,10 +60,40 @@ class GetFirebaseDataCronJob(CronJobBase):
     #menghapus kolom geometry
     x = x.drop(columns=['geometry'])
 
+    df = pd.DataFrame(x)
+
+    # Menghitung total jmlh berdasarkan nilai cluster yang lebih dari 1
+    total_jmlh_per_cluster = df[df['cluster'] > 1].groupby('cluster')['jmlh'].sum().reset_index()
+
+    # Menggabungkan total_jmlh_per_cluster dengan DataFrame asli
+    result_df = pd.merge(df, total_jmlh_per_cluster, how='left', on='cluster', suffixes=('', '_total'))
+
+    # Mengisi nilai NaN pada kolom jmlh_total dengan 0
+    result_df['jmlh_total'] = result_df['jmlh_total'].fillna(0)
+
+    # Membuat fungsi untuk normalisasi berdasarkan rentang nilai
+    def custom_normalize(value):
+        if value <= 100000:
+            return 1
+        elif value <= 500000:
+            return 2
+        elif value <= 700000:
+            return 3
+        elif value <= 1000000:
+            return 4
+        else:
+            return 5
+
+    # Mengaplikasikan fungsi normalisasi pada kolom jmlh_total
+    result_df['jmlh_total_normalized'] = result_df['jmlh_total'].apply(custom_normalize)
+
+    # Menampilkan DataFrame hasil
+    print(result_df)
+
     # Visualisasi hasil clustering
     # plt.figure(figsize=(8, 6))
 
-    plt.scatter(x['lng'], x['lat'], c=x['cluster'], cmap='viridis', s=5)
+    plt.scatter(result_df['lng'], result_df['lat'], c=result_df['cluster'], cmap='viridis', s=5)
     plt.title('DBSCAN Clustering')
     plt.xlabel('Longitude')
     plt.ylabel('Latitude')
@@ -68,18 +101,19 @@ class GetFirebaseDataCronJob(CronJobBase):
 
     plt.savefig('Datamining.png')
 
-    selected_columns = x[["jmlh", "lat", "lng", "timestamp", "cluster"]]
+    selected_columns = result_df[["jmlh", "lat", "lng", "timestamp", "cluster"]]
     selected_columns.to_csv("data_selected.csv", index=False)
 
-    print(x)
+    print(result_df)
     
-    for index, row in x.iterrows():
+    for index, row in result_df.iterrows():
         data = {
             'jmlh': int(row['jmlh']),
             'lat': float(row['lat']),
             'lng': float(row['lng']),
             'timestamp': int(row['timestamp']),
-            'cluster': int(row['cluster'])
+            'cluster': int(row['cluster']),
+            'weight': float(row['jmlh_total_normalized'])
         }
         
     

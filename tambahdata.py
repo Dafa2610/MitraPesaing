@@ -7,7 +7,7 @@ def generate_random_timestamp_within_last_30_days():
     end_date = datetime.now()
     
     # Mendapatkan tanggal 30 hari yang lalu
-    start_date = end_date - timedelta(days=30)
+    start_date = end_date - timedelta(days=60)
     
     # Mengonversi tanggal menjadi detik
     start_timestamp = int(start_date.timestamp())
@@ -27,8 +27,8 @@ with open('data.csv', 'w', newline='') as csvfile:
     # Buat 1000 data acak dalam format yang diinginkan
     for _ in range(1000):
         jmlh = random.randint(10000, 100000)
-        lat = round(random.uniform(-0.06, -0.01), 6)
-        lng = round(random.uniform(109.3, 109.4), 6)
+        lat = round(random.uniform(-0.07, 0.02), 6)
+        lng = round(random.uniform(109.23, 109.4), 6)
         timestamp = round(generate_random_timestamp_within_last_30_days())
 
         row = {'jmlh': jmlh, 'lat': lat, 'lng': lng, 'timestamp': timestamp}
