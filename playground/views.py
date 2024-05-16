@@ -1,19 +1,16 @@
+from background_task import background
 from django_cron import CronJobBase, Schedule
 from django.shortcuts import render
 from django.http import HttpResponse
-from playground.script import olahdata
+import geopandas as gpd
 import pandas as pd
 import firebase_admin
 from firebase_admin import credentials, db
 from sklearn.cluster import DBSCAN
 import matplotlib.pyplot as plt
 import csv
-import base64
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from flask import Flask, jsonify
-from django.core.management.base import BaseCommand
 from firebase_admin import db
+
 
 
  
@@ -25,31 +22,22 @@ firebase_admin.initialize_app(cred, {
 })
 
 class GetFirebaseDataCronJob(CronJobBase):
-    ref = db.reference('data')  # Ganti dengan path data di Firebase
+    ref = db.reference('data') 
 
-
-    # Ambil data dari Firebase
+    # Import data from firebase
     firebase_data = ref.get()
 
     print(firebase_data)
+    
     # Inisialisasi list Django
     data_trsk = pd.read_csv('data.csv', sep=',')
+    
+    def olahdata(data):
+        data_fix = gpd.GeoDataFrame(data, geometry=gpd.points_from_xy(data.lat, data.lng))
+        return data_fix
 
     x = olahdata(data_trsk)
-    # Pilih parameter DBSCAN
-    eps = 0.002  # Sesuaikan nilai ini sesuai kebutuhan Anda
-    min_samples = 5  # Sesuaikan nilai ini sesuai kebutuhan Anda
 
-    dbscan = DBSCAN(eps=eps, min_samples=min_samples)
-    x['cluster'] = dbscan.fit_predict(x[['lat', 'lng']])
-
-    #Hapus Data
-    ref.delete()
-
-    berat_cluster = x['cluster'].value_counts()
-    print(berat_cluster)
-
-    # Visualisasi hasil clustering
     # Pilih parameter DBSCAN
     eps = 0.003  # Sesuaikan nilai ini sesuai kebutuhan Anda
     min_samples = 5  # Sesuaikan nilai ini sesuai kebutuhan Anda
@@ -57,6 +45,9 @@ class GetFirebaseDataCronJob(CronJobBase):
     dbscan = DBSCAN(eps=eps, min_samples=min_samples)
     x['cluster'] = dbscan.fit_predict(x[['lat', 'lng']])
 
+    #Hapus Data
+    ref.delete()
+    
     #menghapus kolom geometry
     x = x.drop(columns=['geometry'])
 
@@ -73,16 +64,18 @@ class GetFirebaseDataCronJob(CronJobBase):
 
     # Membuat fungsi untuk normalisasi berdasarkan rentang nilai
     def custom_normalize(value):
-        if value <= 100000:
-            return 1
+        if value <=0:
+            return 0
+        elif value <= 100000:
+            return 10
         elif value <= 500000:
-            return 2
+            return 20
         elif value <= 700000:
-            return 3
+            return 30
         elif value <= 1000000:
-            return 4
+            return 40
         else:
-            return 5
+            return 50
 
     # Mengaplikasikan fungsi normalisasi pada kolom jmlh_total
     result_df['jmlh_total_normalized'] = result_df['jmlh_total'].apply(custom_normalize)
@@ -119,6 +112,8 @@ class GetFirebaseDataCronJob(CronJobBase):
     
         # Mengirim data ke Firebase
         ref.push().set(data)
+    # Tempatkan kode Anda di sini
+    print("Tugas harian berjalan pada jam 00.00")
     
     # return render(request, 'hello.html', {'data_list': x})
     # RUN_EVERY_MIDNIGHT = Schedule(run_at_times=['00:00'])
