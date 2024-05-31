@@ -39,8 +39,8 @@ class GetFirebaseDataCronJob(CronJobBase):
     x = olahdata(data_trsk)
 
     # Pilih parameter DBSCAN
-    eps = 0.003  # Sesuaikan nilai ini sesuai kebutuhan Anda
-    min_samples = 5  # Sesuaikan nilai ini sesuai kebutuhan Anda
+    eps = 0.004  # Sesuaikan nilai ini sesuai kebutuhan Anda
+    min_samples = 4  # Sesuaikan nilai ini sesuai kebutuhan Anda
 
     dbscan = DBSCAN(eps=eps, min_samples=min_samples)
     x['cluster'] = dbscan.fit_predict(x[['lat', 'lng']])
@@ -64,18 +64,14 @@ class GetFirebaseDataCronJob(CronJobBase):
 
     # Membuat fungsi untuk normalisasi berdasarkan rentang nilai
     def custom_normalize(value):
-        if value <=0:
+        if value <= 0:
             return 0
         elif value <= 100000:
-            return 10
+            return 0.4
         elif value <= 500000:
-            return 20
-        elif value <= 700000:
-            return 30
-        elif value <= 1000000:
-            return 40
+            return 0.6
         else:
-            return 50
+            return 1.0
 
     # Mengaplikasikan fungsi normalisasi pada kolom jmlh_total
     result_df['jmlh_total_normalized'] = result_df['jmlh_total'].apply(custom_normalize)

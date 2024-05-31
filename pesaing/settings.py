@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'playground',
     'rest_framework',
-    'django_cron'
+    'django_cron',
 ]
 
 MIDDLEWARE = [
@@ -127,5 +127,5 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CRON_CLASSES = [
-    'playground.cron.PanggilData'
+    'playground.views.GetFirebaseDataCronJob'
 ]
